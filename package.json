@@ -1,0 +1,27 @@
+{
+  "name": "onboardai",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "docker-compose up",
+    "dev:auth": "npm run dev --workspace=apps/service-auth",
+    "dev:onboarding": "npm run dev --workspace=apps/service-onboarding",
+    "dev:company": "npm run dev --workspace=apps/web-company",
+    "dev:employee": "npm run dev --workspace=apps/web-employee",
+    "dev:notification": "npm run dev --workspace=apps/service-notification",
+    "build": "npm run build --workspaces",
+    "lint": "npm run lint --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.0"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  }
+}

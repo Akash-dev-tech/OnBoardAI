@@ -1,0 +1,50 @@
+version: '3.9'
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: onboardai_postgres
+    environment:
+      POSTGRES_USER: onboardai
+      POSTGRES_PASSWORD: onboardai_dev
+      POSTGRES_DB: onboardai
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U onboardai"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: onboardai_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mongo:
+    image: mongo:7
+    container_name: onboardai_mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: onboardai
+      MONGO_INITDB_ROOT_PASSWORD: onboardai_dev
+      MONGO_INITDB_DATABASE: onboardai
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+volumes:
+  postgres_data:
+  redis_data:
+  mongo_data:

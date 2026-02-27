@@ -1,0 +1,9 @@
+{
+  "name": "@onboardai/utils",
+  "version": "1.0.0",
+  "main": "./index.ts",
+  "private": true,
+  "dependencies": {
+    "@onboardai/types": "*"
+  }
+}
