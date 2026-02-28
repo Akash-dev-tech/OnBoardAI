@@ -1,11 +1,12 @@
+import dotenv from 'dotenv';
+import path from 'path';
+dotenv.config({ path: path.resolve(__dirname, '../.env'), override: true });
+
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
-import dotenv from 'dotenv';
-import path from 'path';
 import { logger } from '@onboardai/utils';
-
-dotenv.config({ path: path.resolve(__dirname, '../.env') });
+import authRoutes from './routes/auth.routes';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -23,7 +24,6 @@ app.get('/health', (req, res) => {
   });
 });
 
-import authRoutes from './routes/auth.routes';
 app.use('/api/v1/auth', authRoutes);
 
 app.use((req, res) => {

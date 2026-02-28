@@ -10,7 +10,7 @@ dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 const prisma = new PrismaClient({
   datasources: {
     db: {
-      url: 'postgresql://onboardai:onboardai_dev@localhost:5432/onboardai'
+      url: process.env.POSTGRES_URL
     }
   }
 });
