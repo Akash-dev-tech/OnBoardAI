@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '../generated/prisma';
 import bcrypt from 'bcryptjs';
 import * as jwt from 'jsonwebtoken';
 import { logger } from '@onboardai/utils';
@@ -60,7 +60,7 @@ export class AuthService {
     });
 
     const user = company.users[0];
-    const token = this.generateToken(user.id, user.role);
+    const token = this.generateToken(user.id, user.role, user.companyId);
 
     logger.info('New company registered', { companyId: company.id, email });
 
@@ -84,7 +84,7 @@ export class AuthService {
     const isValid = await bcrypt.compare(password, user.password);
     if (!isValid) throw new Error('Invalid email or password');
 
-    const token = this.generateToken(user.id, user.role);
+    const token = this.generateToken(user.id, user.role, user.companyId);
 
     logger.info('User logged in', { userId: user.id, email });
 
@@ -115,9 +115,9 @@ export class AuthService {
     };
   }
 
-  private generateToken(userId: string, role: string): string {
+  private generateToken(userId: string, role: string, companyId: string): string {
     const secret = process.env.JWT_SECRET as string || 'fallback_secret';
     const expiresIn = (process.env.JWT_EXPIRES_IN || '7d') as jwt.SignOptions['expiresIn'];
-    return jwt.sign({ id: userId, role }, secret, { expiresIn });
+    return jwt.sign({ id: userId, role, companyId }, secret, { expiresIn });
   }
 }
