@@ -42,3 +42,5 @@ coverage/
 
 # Turborepo
 .turbo/
+apps/service-auth/src/generated/
+apps/service-onboarding/src/generated/
