@@ -2,19 +2,18 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
+import path from 'path';
 import { logger } from '@onboardai/utils';
 
-dotenv.config();
+dotenv.config({ path: path.resolve(__dirname, '../.env') });
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// ─── MIDDLEWARE ─────────────────────────────────────────────
 app.use(helmet());
 app.use(cors());
 app.use(express.json());
 
-// ─── HEALTH CHECK ───────────────────────────────────────────
 app.get('/health', (req, res) => {
   res.json({
     success: true,
@@ -24,11 +23,9 @@ app.get('/health', (req, res) => {
   });
 });
 
-// ─── ROUTES ─────────────────────────────────────────────────
 import authRoutes from './routes/auth.routes';
 app.use('/api/v1/auth', authRoutes);
 
-// ─── 404 HANDLER ────────────────────────────────────────────
 app.use((req, res) => {
   res.status(404).json({
     success: false,
@@ -36,7 +33,6 @@ app.use((req, res) => {
   });
 });
 
-// ─── START ──────────────────────────────────────────────────
 app.listen(PORT, () => {
   logger.info(`service-auth running`, { port: PORT });
 });

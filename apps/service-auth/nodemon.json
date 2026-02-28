@@ -2,5 +2,11 @@
   "watch": ["src"],
   "ext": "ts",
   "ignore": ["src/**/*.test.ts"],
-  "exec": "ts-node --project tsconfig.json src/index.ts"
+  "exec": "ts-node --project tsconfig.json src/index.ts",
+  "env": {
+    "PORT": "3001",
+    "POSTGRES_URL": "postgresql://onboardai:onboardai_dev@localhost:5432/onboardai",
+    "JWT_SECRET": "onboardai_super_secret_jwt_key_dev",
+    "JWT_EXPIRES_IN": "7d"
+  }
 }
