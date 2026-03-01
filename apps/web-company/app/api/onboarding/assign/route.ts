@@ -5,7 +5,6 @@ const ONBOARDING_URL = process.env.ONBOARDING_API_URL || process.env.NEXT_PUBLIC
 const AUTH_URL = process.env.AUTH_API_URL || 'http://localhost:3001';
 
 export async function POST(req: NextRequest) {
-  return NextResponse.json({ message: "AKASH_TEST_V1" });
   const token = cookies().get('onboardai_token')?.value;
   if (!token) return NextResponse.json({ success: false }, { status: 401 });
 
