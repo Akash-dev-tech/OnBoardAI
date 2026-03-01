@@ -1,24 +1,33 @@
 import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 
+export const dynamic = 'force-dynamic';
+
 const ONBOARDING_URL = process.env.ONBOARDING_API_URL || process.env.NEXT_PUBLIC_ONBOARDING_API_URL || 'http://localhost:3002';
 const AUTH_URL = process.env.AUTH_API_URL || 'http://localhost:3001';
 
 export async function POST(req: NextRequest) {
-  const token = cookies().get('onboardai_token')?.value;
-  if (!token) return NextResponse.json({ success: false }, { status: 401 });
+  const rawText = await req.text();
+  console.log('ASSIGN ROUTE HIT - raw body:', rawText);
+  
+  let body: any = {};
+  try { body = JSON.parse(rawText); } catch(e) { 
+    return NextResponse.json({ success: false, message: 'Invalid JSON', raw: rawText });
+  }
 
-  const body = await req.json();
   const { employeeName, employeeEmail, templateId } = body;
+  console.log('Parsed:', { employeeName, employeeEmail, templateId });
 
-  // Debug: return exactly what we received
   if (!employeeName || !employeeEmail || !templateId) {
-    return NextResponse.json({ 
-      success: false, 
+    return NextResponse.json({
+      success: false,
       message: 'All fields are required',
-      debug: { employeeName, employeeEmail, templateId, body }
+      debug: { employeeName, employeeEmail, templateId }
     }, { status: 400 });
   }
+
+  const token = cookies().get('onboardai_token')?.value;
+  if (!token) return NextResponse.json({ success: false, message: 'No token' }, { status: 401 });
 
   const meRes = await fetch(`${AUTH_URL}/api/v1/auth/me`, {
     headers: { Authorization: `Bearer ${token}` },
@@ -29,7 +38,6 @@ export async function POST(req: NextRequest) {
   }
 
   const company = meData.data.company;
-
   const registerRes = await fetch(`${AUTH_URL}/api/v1/auth/register`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -45,7 +53,7 @@ export async function POST(req: NextRequest) {
 
   const registerData = await registerRes.json();
   if (!registerData.success) {
-    return NextResponse.json({ success: false, message: registerData.error?.message || 'Failed to create employee' }, { status: 400 });
+    return NextResponse.json({ success: false, message: registerData.error?.message || registerData.message || 'Failed to create employee', registerData }, { status: 400 });
   }
 
   const employeeId = registerData.data?.user?.id;
@@ -58,6 +66,5 @@ export async function POST(req: NextRequest) {
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
     body: JSON.stringify({ employeeId, templateId }),
   });
-
   return NextResponse.json(await assignRes.json());
 }
