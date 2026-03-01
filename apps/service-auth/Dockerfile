@@ -4,6 +4,7 @@ COPY package.json package-lock.json ./
 COPY packages/ ./packages/
 COPY apps/service-auth/package.json ./apps/service-auth/
 COPY apps/service-auth/prisma/ ./apps/service-auth/prisma/
+COPY apps/service-auth/tsconfig.json ./apps/service-auth/
 COPY apps/service-auth/src/ ./apps/service-auth/src/
 RUN npm install
 WORKDIR /app/packages/utils
