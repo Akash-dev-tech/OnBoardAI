@@ -1,17 +1,33 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
-export default function AssignForm({ templates, defaultTemplateId }: { templates: any[]; defaultTemplateId: string }) {
+export default function AssignForm({ templates: initialTemplates, defaultTemplateId }: { templates: any[]; defaultTemplateId: string }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
+  const [templates, setTemplates] = useState(initialTemplates);
   const [form, setForm] = useState({
     employeeName: '',
     employeeEmail: '',
-    templateId: defaultTemplateId || (templates[0]?.id || ''),
+    templateId: defaultTemplateId || (initialTemplates[0]?.id || ''),
   });
+
+  useEffect(() => {
+    // Fetch templates client-side as fallback
+    fetch('/api/onboarding/templates')
+      .then(r => r.json())
+      .then(data => {
+        if (data.success && data.data?.length > 0) {
+          setTemplates(data.data);
+          if (!form.templateId) {
+            setForm(f => ({ ...f, templateId: data.data[0].id }));
+          }
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -59,18 +75,17 @@ export default function AssignForm({ templates, defaultTemplateId }: { templates
         <label className="block text-sm font-medium text-gray-300 mb-2">Onboarding Template</label>
         <select required value={form.templateId} onChange={e => setForm({ ...form, templateId: e.target.value })}
           className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-blue-500">
+          {templates.length === 0 && <option value="">No templates found</option>}
           {templates.map((t: any) => (
             <option key={t.id} value={t.id}>{t.name}</option>
           ))}
         </select>
       </div>
-      <button type="submit" disabled={loading || templates.length === 0}
+      <div className="text-xs text-gray-500">templateId: {form.templateId || 'EMPTY!'}</div>
+      <button type="submit" disabled={loading || !form.templateId}
         className="w-full bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white py-3 rounded-lg font-medium">
         {loading ? 'Assigning...' : 'Assign Onboarding'}
       </button>
-      {templates.length === 0 && (
-        <p className="text-yellow-500 text-sm text-center">Create a template first before assigning.</p>
-      )}
     </form>
   );
 }
