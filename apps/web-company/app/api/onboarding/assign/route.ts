@@ -15,14 +15,27 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: false, message: 'All fields are required' }, { status: 400 });
   }
 
-  // Step 1: Register the employee user
+  // Step 1: Get current admin's company info
+  const meRes = await fetch(`${AUTH_URL}/api/v1/auth/me`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  const meData = await meRes.json();
+  if (!meData.success) {
+    return NextResponse.json({ success: false, message: 'Could not get company info' }, { status: 400 });
+  }
+
+  const company = meData.data.company;
+
+  // Step 2: Register employee under same company
   const registerRes = await fetch(`${AUTH_URL}/api/v1/auth/register`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       fullName: employeeName,
       email: employeeEmail,
       password: 'Welcome@123',
+      companyName: company.name,
+      domain: company.domain,
       role: 'employee',
     }),
   });
@@ -30,7 +43,7 @@ export async function POST(req: NextRequest) {
   const registerData = await registerRes.json();
 
   if (!registerData.success) {
-    return NextResponse.json({ success: false, message: registerData.message || registerData.error || 'Failed to create employee' }, { status: 400 });
+    return NextResponse.json({ success: false, message: registerData.error?.message || 'Failed to create employee' }, { status: 400 });
   }
 
   const employeeId = registerData.data?.user?.id;
@@ -39,7 +52,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: false, message: 'Could not get employee ID' }, { status: 500 });
   }
 
-  // Step 2: Assign the template
+  // Step 3: Assign the template
   const assignRes = await fetch(`${ONBOARDING_URL}/api/v1/templates/assign`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
