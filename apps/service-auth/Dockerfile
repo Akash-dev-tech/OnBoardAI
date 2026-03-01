@@ -1,6 +1,6 @@
 FROM node:20-alpine
 WORKDIR /app
-COPY package.json package-lock.json ./
+COPY package.json package-lock.json tsconfig.base.json ./
 COPY packages/ ./packages/
 COPY apps/service-auth/package.json ./apps/service-auth/
 COPY apps/service-auth/prisma/ ./apps/service-auth/prisma/
